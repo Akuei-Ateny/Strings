@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------*/
 /* replace.c                                                          */
-/* Author: ???                                                        */
+/* Author: Akuei Johnson Ateny                                                        */
 /*--------------------------------------------------------------------*/
 
 #include "str.h"
@@ -17,28 +17,34 @@
    assumptions about the maximum number of replacements or the
    maximum number of characters in strings pcLine, pcFrom, or pcTo. */
 
-static size_t replaceAndWrite(const char *pcLine,
-                              const char *pcFrom, const char *pcTo)
-{
 
-   size_t replaceCount = 0;
-   size_t fromLen = Str_getLength(pcFrom);
+/* Function to replace occurrences of pcFrom with pcTo in pcLine and write to stdout */
+size_t replaceAndWrite(const char *pcLine, const char *pcFrom, const char *pcTo) {
+   size_t replaceCount = 0; /* Counter to track the number of replacements */
+   size_t fromLen = Str_getLength(pcFrom); /* Length of pcFrom string */
 
-   assert(pcLine != NULL && pcFrom != NULL && pcTo != NULL); /* Checking for null pointers */
+   /* Ensuring pcLine and pcTo are not NULL */
+    assert(pcLine != NULL && pcTo != NULL && pcFrom != NULL);
+    
+    if (pcFrom == NULL || pcFrom[0] == '\0') {
+        fputs(pcLine, stdout);
+        return 0;
+    }
 
-   while (*pcLine != '\0') {
-      const char *found = Str_search(pcLine, pcFrom);
-      if (found != NULL) {
-         replaceCount++;
-         fwrite(pcLine, sizeof(char), found - pcLine, stdout);
-         fputs(pcTo, stdout);
-         pcLine = found + fromLen;
-      } else {
-         fputs(pcLine, stdout);
-         break;
-      }
-   }
-   return replaceCount;
+    /* Looping through pcLine until end of string is reached */
+    while (*pcLine != '\0') {
+        const char *found = Str_search(pcLine, pcFrom);
+        if (found != NULL) {
+            replaceCount++;
+            fwrite(pcLine, sizeof(char), found - pcLine, stdout);
+            fputs(pcTo, stdout);
+            pcLine = found + fromLen;
+        } else {
+            fputs(pcLine, stdout);
+            break;
+        }
+    }
+    return replaceCount;
 }
 
 /*--------------------------------------------------------------------*/
@@ -54,30 +60,29 @@ static size_t replaceAndWrite(const char *pcLine,
    Assume that no line of stdin consists of more than MAX_LINE_SIZE-1
    characters. */
 
+/* The main function */
 int main(int argc, char *argv[])
 {
-   enum {MAX_LINE_SIZE = 4096};
-   enum {PROPER_ARG_COUNT = 3};
+    enum { MAX_LINE_SIZE = 4096 };
+    enum { PROPER_ARG_COUNT = 3 };
 
-   char acLine[MAX_LINE_SIZE];
-   char *pcFrom;
-   char *pcTo;
-   size_t uReplaceCount = 0;
+    char acLine[MAX_LINE_SIZE];
+    char *pcFrom;
+    char *pcTo;
+    size_t uReplaceCount = 0;
 
-   if (argc != PROPER_ARG_COUNT)
-   {
-      fprintf(stderr, "usage: %s fromstring tostring\n", argv[0]);
-      return EXIT_FAILURE;
-   }
+    if (argc != PROPER_ARG_COUNT) {
+        fprintf(stderr, "usage: %s fromstring tostring\n", argv[0]);
+        return EXIT_FAILURE;
+    }
 
-   pcFrom = argv[1];
-   pcTo = argv[2];
+    pcFrom = argv[1];
+    pcTo = argv[2];
 
-   while (fgets(acLine, MAX_LINE_SIZE, stdin) != NULL) {
-      uReplaceCount += replaceAndWrite(acLine, pcFrom, pcTo);
-   }
-      
+    while (fgets(acLine, MAX_LINE_SIZE, stdin) != NULL) {
+        uReplaceCount += replaceAndWrite(acLine, pcFrom, pcTo);
+    }
 
-   fprintf(stderr, "%lu replacements\n", (unsigned long)uReplaceCount);
-   return 0;
+    fprintf(stderr, "%lu replacements\n", (unsigned long)uReplaceCount);
+    return 0;
 }
